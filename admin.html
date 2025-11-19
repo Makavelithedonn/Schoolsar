@@ -1,0 +1,94 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin - Submissions</title>
+    <style>
+      body{font-family:Arial,Helvetica,sans-serif;padding:20px}
+      .card{max-width:900px;margin:0 auto}
+      table{width:100%;border-collapse:collapse}
+      th,td{border:1px solid #ddd;padding:8px;text-align:left}
+      th{background:#f4f4f4}
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h1>Admin Dashboard</h1>
+      <div id="login">
+        <h3>Login</h3>
+        <label>Username <input id="username" value="admin"></label>
+        <label>Password <input id="password" type="password" value="change_me"></label>
+        <button id="btnLogin">Login</button>
+        <p id="loginMsg" style="color:red"></p>
+      </div>
+
+      <div id="app" style="display:none">
+        <p><button id="btnLogout">Logout</button></p>
+        <h3>Recent Submissions</h3>
+        <div id="submissions"></div>
+      </div>
+    </div>
+
+    <script>
+      const loginEl = document.getElementById('login');
+      const appEl = document.getElementById('app');
+      const loginMsg = document.getElementById('loginMsg');
+
+      function saveToken(t){localStorage.setItem('admin_token', t)}
+      function getToken(){return localStorage.getItem('admin_token')}
+      function clearToken(){localStorage.removeItem('admin_token')}
+
+      async function fetchSubmissions(){
+        const token = getToken();
+        const res = await fetch('/api/admin/submissions', { headers: { Authorization: 'Bearer '+token }});
+        if (!res.ok) {
+          if (res.status === 401) { clearToken(); showLogin(); }
+          throw new Error('Failed to load');
+        }
+        const data = await res.json();
+        renderSubmissions(data.submissions || []);
+      }
+
+      function renderSubmissions(rows){
+        const container = document.getElementById('submissions');
+        if (!rows.length) { container.innerHTML = '<p>No submissions yet.</p>'; return; }
+        let html = '<table><thead><tr><th>ID</th><th>Page</th><th>Data</th><th>Created</th></tr></thead><tbody>';
+        for (const r of rows) {
+          html += `<tr><td>${r.id}</td><td>${escape(r.page)}</td><td><pre>${escape(JSON.stringify(r.data, null, 2))}</pre></td><td>${new Date(r.created_at).toLocaleString()}</td></tr>`;
+        }
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
+
+      function escape(s){return (s==null)?'':String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+      function showLogin(){ loginEl.style.display='block'; appEl.style.display='none'; }
+      function showApp(){ loginEl.style.display='none'; appEl.style.display='block'; }
+
+      document.getElementById('btnLogin').addEventListener('click', async ()=>{
+        loginMsg.textContent='';
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        try{
+          const res = await fetch('/api/admin/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username,password}) });
+          const j = await res.json();
+          if (!res.ok) { loginMsg.textContent = j.error || 'Login failed'; return; }
+          saveToken(j.token);
+          showApp();
+          await fetchSubmissions();
+        }catch(e){ loginMsg.textContent = e.message }
+      });
+
+      document.getElementById('btnLogout').addEventListener('click', ()=>{ clearToken(); showLogin(); });
+
+      // on load, try token
+      (async ()=>{
+        const t = getToken();
+        if (t) {
+          try{ await fetchSubmissions(); showApp(); } catch(e){ showLogin(); }
+        } else showLogin();
+      })();
+    </script>
+  </body>
+</html>

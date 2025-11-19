@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: payit-backend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "3000"
+databases:
+  - name: payit-db
+    engine: postgres
+    plan: starter
+
+# After pushing this repo to GitHub, create a new Render service
+# and Render will use this manifest for deploy configuration.

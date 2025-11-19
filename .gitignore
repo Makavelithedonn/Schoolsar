@@ -1,0 +1,19 @@
+# Node
+node_modules
+/**/node_modules
+
+# Env and secrets
+.env
+.env.*
+
+# Databases and build
+backend/data
+data
+*.db
+
+# Logs
+*.log
+server.log
+
+# Ignore Docker artifacts
+.dockerignore

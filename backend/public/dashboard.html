@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Submissions Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="p-3">
+    <div class="container-fluid">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>Payit Submissions</h3>
+        <div>
+          <a class="btn btn-sm btn-secondary" href="/api/admin/export">Export CSV</a>
+          <button id="logout" class="btn btn-sm btn-outline-danger">Logout</button>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <input id="q" placeholder="Search" class="form-control" />
+      </div>
+
+      <table class="table table-striped">
+        <thead><tr><th>#</th><th>Created</th><th>Full name</th><th>ID</th><th>Phone</th><th>Action</th></tr></thead>
+        <tbody id="list"></tbody>
+      </table>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="modal">
+      <div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Submission</h5><button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="hideModal()"><span aria-hidden="true">&times;</span></button></div><div class="modal-body" id="modal-body"></div><div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideModal()">Close</button></div></div></div>
+    </div>
+
+    <script>
+      async function fetchList(q) {
+        const res = await fetch('/api/admin/submissions' + (q ? '?q=' + encodeURIComponent(q) : ''));
+        if (res.status === 401) return window.location.href = '/admin/login.html';
+        const data = await res.json();
+        const tbody = document.getElementById('list');
+        tbody.innerHTML = '';
+        data.forEach(s => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${s.id}</td><td>${new Date(s.created_at).toLocaleString()}</td><td>${(s.data.full_name||'')}</td><td>${(s.data.id_no||'')}</td><td>${(s.data.phone||'')}</td><td><button class="btn btn-sm btn-primary" onclick="view(${s.id})">View</button></td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function view(id) {
+        const res = await fetch('/api/admin/submission/' + id);
+        if (res.status === 401) return window.location.href = '/admin/login.html';
+        const json = await res.json();
+        document.getElementById('modal-body').innerHTML = '<pre>' + JSON.stringify(json, null, 2) + '</pre>';
+        document.getElementById('modal').style.display = 'block';
+      }
+      function hideModal(){ document.getElementById('modal').style.display = 'none'; }
+
+      document.getElementById('q').addEventListener('input', (e) => { fetchList(e.target.value); });
+      document.getElementById('logout').addEventListener('click', async () => { await fetch('/api/admin/logout', { method: 'POST' }); window.location.href = '/admin/login.html'; });
+
+      fetchList();
+    </script>
+  </body>
+</html>

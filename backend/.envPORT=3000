@@ -1,0 +1,15 @@
+DATABASE_FILE=./data/payit.db
+# If you want FormSubmit forwarding, set a recipient email (e.g. youremail@exam$
+FORMSUBMIT_EMAIL=jacobqt39@gmail.com
+# Admin credentials for dashboard (simple env-based auth). Change before deploy.
+ADMIN_USER=admin
+ADMIN_PASS=Jj123qwe@
+SESSION_SECRET=openssl rand -hex 32# Copy this file to .env and set real values
+PORT=3000
+DATABASE_FILE=./data/payit.db
+# If you want FormSubmit forwarding, set a recipient email (e.g. youremail@example.com)
+FORMSUBMIT_EMAIL=
+# Admin credentials for dashboard (simple env-based auth). Change before deploy.
+ADMIN_USER=admin
+ADMIN_PASS=changeme
+SESSION_SECRET=change_this_secret
