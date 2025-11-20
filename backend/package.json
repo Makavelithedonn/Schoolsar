@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/app.js",
     "seed-admin": "node src/seed-admin.js",
-    "dev": "vercel dev"
+    "dev": "vercel dev",
+    "migrate": "node src/migrate.js"
   },
   "keywords": [],
   "author": "",

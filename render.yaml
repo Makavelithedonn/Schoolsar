@@ -1,6 +1,8 @@
 services:
   - type: web
     name: payit-backend
+    # Ensure Render uses the `backend` folder as the service root so it finds package.json
+    root: backend
     env: node
     plan: free
     region: oregon

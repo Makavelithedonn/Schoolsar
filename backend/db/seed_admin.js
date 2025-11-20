@@ -17,6 +17,23 @@ const pool = new Pool({
 });
 
 async function seed() {
+  // Run migration SQL (if present) so tables exist before seeding
+  const fs = require('fs');
+  const path = require('path');
+  const migPath = path.join(__dirname, 'migrations', '001_init.sql');
+  try {
+    if (fs.existsSync(migPath)) {
+      const migSql = fs.readFileSync(migPath, 'utf8');
+      if (migSql && migSql.trim()) {
+        console.log('Running migration SQL from', migPath);
+        await pool.query(migSql);
+        console.log('Migration SQL executed');
+      }
+    }
+  } catch (e) {
+    console.warn('Migration step warning:', e.message || e);
+  }
+
   try {
     await pool.query("CREATE EXTENSION IF NOT EXISTS pgcrypto;");
   } catch (e) {
