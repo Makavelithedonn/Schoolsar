@@ -6,8 +6,11 @@ services:
     env: node
     plan: free
     region: oregon
-    buildCommand: cd backend && npm install
-    startCommand: cd backend && npm start
+    # Use npm's --prefix so Render runs install/start in the backend folder
+    # regardless of the configured service root. This avoids ENOENT errors
+    # when Render attempts to run npm in the wrong directory.
+    buildCommand: npm --prefix backend install
+    startCommand: npm --prefix backend start
     envVars:
       - key: NODE_ENV
         value: production
