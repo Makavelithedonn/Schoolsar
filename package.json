@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "name": "schoolsar-root",
+  "version": "0.0.0",
+  "scripts": {
+    "install": "npm --prefix backend install",
+    "start": "npm --prefix backend start"
+  }
+}
